@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use std::io::{BufReader, BufRead};
 use std::thread;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 // Global state para processos Flutter
 lazy_static::lazy_static! {
