@@ -1,17 +1,19 @@
 import { useEffect } from 'react';
 import { MonacoEditor } from './MonacoEditor';
 import { FileExplorer } from './FileExplorer';
-import { FlutterControls } from './FlutterControls';
 import { Console } from './Console';
 import { PreviewPanel } from './PreviewPanel';
 import { WidgetInspector } from './WidgetInspector';
 import { useAuth } from '../../hooks/useAuth';
 import { useFileExplorerStore } from '../../stores/fileExplorerStore';
+import { useFlutterStore } from '../../stores/flutterStore';
+import { FileSystemService } from '../../services/fileSystem';
 import './EditorLayout.css';
 
 export function EditorLayout() {
   const { user, signOut } = useAuth();
-  const { currentFile, openFiles, updateFileContent, saveFile } = useFileExplorerStore();
+  const { workspaceRoot, currentFile, openFiles, updateFileContent, saveFile } = useFileExplorerStore();
+  const { isRunning, startFlutter, stopFlutter, hotReload } = useFlutterStore();
 
   const currentContent = currentFile ? openFiles.get(currentFile) || '' : '';
   const currentFileName = currentFile ? currentFile.split(/[\\/]/).pop() || 'Sem arquivo' : 'Sem arquivo';
@@ -41,18 +43,55 @@ export function EditorLayout() {
     }
   };
 
-  // Save on Ctrl+S
+  // Auto-start Flutter when workspace opens (if Flutter project)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const autoStartFlutter = async () => {
+      if (workspaceRoot && !isRunning) {
+        const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
+        if (isFlutter) {
+          console.log('[Auto-Preview] Flutter project detected, starting preview...');
+          try {
+            await startFlutter(workspaceRoot);
+            console.log('[Auto-Preview] Preview started successfully');
+          } catch (error) {
+            console.error('[Auto-Preview] Failed to start preview:', error);
+          }
+        }
+      }
+    };
+
+    autoStartFlutter();
+
+    // Cleanup on unmount
+    return () => {
+      if (isRunning) {
+        stopFlutter();
+      }
+    };
+  }, [workspaceRoot]);
+
+  // Auto hot reload on save
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        handleSave();
+        await handleSave();
+
+        // Trigger hot reload if Flutter is running and file is Dart
+        if (isRunning && currentFile?.endsWith('.dart')) {
+          console.log('[Auto Hot Reload] Triggering hot reload...');
+          try {
+            await hotReload();
+          } catch (error) {
+            console.error('[Auto Hot Reload] Failed:', error);
+          }
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentFile, currentContent]);
+  }, [currentFile, currentContent, isRunning]);
 
   return (
     <div className="editor-layout">
@@ -70,7 +109,12 @@ export function EditorLayout() {
             <span className="file-icon">📄</span>
             <span className="file-name">{currentFileName}</span>
           </div>
-          <FlutterControls />
+          {isRunning && (
+            <div className="preview-status">
+              <span className="status-indicator running"></span>
+              <span className="status-text">Preview Running</span>
+            </div>
+          )}
         </div>
 
         <div className="header-right">

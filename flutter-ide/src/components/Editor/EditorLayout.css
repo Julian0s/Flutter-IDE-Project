@@ -60,6 +60,39 @@
   border-radius: 6px;
 }
 
+.preview-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a472a;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-left: 12px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ec9b0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-text {
+  font-size: 13px;
+  color: #4ec9b0;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .file-icon {
   font-size: 16px;
 }
