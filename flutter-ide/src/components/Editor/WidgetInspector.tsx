@@ -1,11 +1,20 @@
 import React, { useEffect } from 'react';
 import { useWidgetInspectorStore } from '../../stores/widgetInspectorStore';
+import { useFlutterStore } from '../../stores/flutterStore';
 import { WidgetInspectorService } from '../../services/widgetInspectorService';
+import { open } from '@tauri-apps/plugin-shell';
 import './WidgetInspector.css';
 
 export const WidgetInspector: React.FC = () => {
   const { isEnabled, selectedWidget, hoveredWidget, setSelectedWidget, setHoveredWidget } =
     useWidgetInspectorStore();
+  const { devToolsUrl } = useFlutterStore();
+
+  const handleOpenDevTools = async () => {
+    if (devToolsUrl) {
+      await open(devToolsUrl);
+    }
+  };
 
   // Setup listeners for widget selection
   useEffect(() => {
@@ -25,8 +34,34 @@ export const WidgetInspector: React.FC = () => {
 
   const currentWidget = selectedWidget || hoveredWidget;
 
-  // Only show if inspector is enabled AND there's a widget selected
-  if (!isEnabled || !currentWidget) {
+  // Show DevTools button if inspector is enabled but no widget selected
+  if (isEnabled && !currentWidget && devToolsUrl) {
+    return (
+      <div className="widget-inspector devtools-prompt">
+        <div className="inspector-header">
+          <h3>Widget Inspector</h3>
+          <div className="inspector-status active">
+            <span className="status-dot"></span>
+            Ready
+          </div>
+        </div>
+        <div className="devtools-content">
+          <div className="devtools-icon">🛠️</div>
+          <h4>Use Flutter DevTools</h4>
+          <p>Click elements in the preview or open professional DevTools for advanced inspection</p>
+          <button className="btn-devtools" onClick={handleOpenDevTools}>
+            Open Flutter DevTools
+          </button>
+          <div className="devtools-hint">
+            DevTools provides widget tree, inspector, performance profiler, and more
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Only show full inspector if there's a widget selected
+  if (!currentWidget) {
     return null;
   }
 

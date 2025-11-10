@@ -80,4 +80,15 @@ export class FlutterService {
       callback(event.payload);
     });
   }
+
+  /**
+   * Listen to VM Service URI (for DevTools integration)
+   * @param callback - Function to call when VM Service URI is detected
+   * @returns Unlisten function to stop listening
+   */
+  static onVmServiceUri(callback: (uri: string) => void): Promise<UnlistenFn> {
+    return listen<string>('vm-service-uri', (event) => {
+      callback(event.payload);
+    });
+  }
 }

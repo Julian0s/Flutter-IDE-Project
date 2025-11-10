@@ -6,12 +6,15 @@ interface FlutterState {
   // State
   isRunning: boolean;
   previewUrl: string | null;
+  vmServiceUri: string | null;
+  devToolsUrl: string | null;
   logs: string[];
   errors: string[];
 
   // Listeners
   logUnlisten: UnlistenFn | null;
   errorUnlisten: UnlistenFn | null;
+  vmServiceUnlisten: UnlistenFn | null;
 
   // Actions
   startFlutter: (projectPath: string) => Promise<void>;
@@ -27,18 +30,22 @@ export const useFlutterStore = create<FlutterState>((set, get) => ({
   // Initial state
   isRunning: false,
   previewUrl: null,
+  vmServiceUri: null,
+  devToolsUrl: null,
   logs: [],
   errors: [],
   logUnlisten: null,
   errorUnlisten: null,
+  vmServiceUnlisten: null,
 
   // Setup event listeners
   setupListeners: async () => {
-    const { logUnlisten, errorUnlisten } = get();
+    const { logUnlisten, errorUnlisten, vmServiceUnlisten } = get();
 
     // Cleanup existing listeners
     if (logUnlisten) await logUnlisten();
     if (errorUnlisten) await errorUnlisten();
+    if (vmServiceUnlisten) await vmServiceUnlisten();
 
     // Setup new listeners
     const newLogUnlisten = await FlutterService.onLog((log) => {
@@ -53,15 +60,26 @@ export const useFlutterStore = create<FlutterState>((set, get) => ({
       }));
     });
 
-    set({ logUnlisten: newLogUnlisten, errorUnlisten: newErrorUnlisten });
+    const newVmServiceUnlisten = await FlutterService.onVmServiceUri((uri) => {
+      console.log('[DevTools] VM Service URI received:', uri);
+      const devToolsUrl = `https://devtools.flutter.dev/?uri=${encodeURIComponent(uri)}`;
+      set({ vmServiceUri: uri, devToolsUrl });
+    });
+
+    set({
+      logUnlisten: newLogUnlisten,
+      errorUnlisten: newErrorUnlisten,
+      vmServiceUnlisten: newVmServiceUnlisten
+    });
   },
 
   // Cleanup listeners
   cleanupListeners: () => {
-    const { logUnlisten, errorUnlisten } = get();
+    const { logUnlisten, errorUnlisten, vmServiceUnlisten } = get();
     if (logUnlisten) logUnlisten();
     if (errorUnlisten) errorUnlisten();
-    set({ logUnlisten: null, errorUnlisten: null });
+    if (vmServiceUnlisten) vmServiceUnlisten();
+    set({ logUnlisten: null, errorUnlisten: null, vmServiceUnlisten: null });
   },
 
   // Start Flutter process
@@ -88,6 +106,8 @@ export const useFlutterStore = create<FlutterState>((set, get) => ({
       set({
         isRunning: false,
         previewUrl: null,
+        vmServiceUri: null,
+        devToolsUrl: null,
         logs: [],
         errors: []
       });

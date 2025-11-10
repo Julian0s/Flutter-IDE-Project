@@ -36,7 +36,7 @@ async fn run_flutter(app: AppHandle, project_path: String) -> Result<String, Str
         .spawn()
         .map_err(|e| format!("Failed to start Flutter: {}", e))?;
 
-    // Capture stdout for logging
+    // Capture stdout for logging and VM Service URI
     if let Some(stdout) = child.stdout.take() {
         let app_handle = app.clone();
         thread::spawn(move || {
@@ -44,6 +44,23 @@ async fn run_flutter(app: AppHandle, project_path: String) -> Result<String, Str
             for line in reader.lines() {
                 if let Ok(line) = line {
                     println!("[Flutter] {}", line);
+
+                    // Check for VM Service URI
+                    if line.contains("Dart VM") || line.contains("Observatory") || line.contains("ws://") {
+                        // Extract URI from line (format: "The Dart VM service is listening on http://...")
+                        if let Some(start) = line.find("http://") {
+                            if let Some(end) = line[start..].find(|c: char| c.is_whitespace()) {
+                                let vm_uri = &line[start..start + end];
+                                println!("[DevTools] VM Service URI: {}", vm_uri);
+                                let _ = app_handle.emit("vm-service-uri", vm_uri.to_string());
+                            } else {
+                                let vm_uri = &line[start..];
+                                println!("[DevTools] VM Service URI: {}", vm_uri);
+                                let _ = app_handle.emit("vm-service-uri", vm_uri.to_string());
+                            }
+                        }
+                    }
+
                     let _ = app_handle.emit("flutter-log", line);
                 }
             }
