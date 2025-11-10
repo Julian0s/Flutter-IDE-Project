@@ -33,10 +33,29 @@ async fn run_flutter(app: AppHandle, project_path: String) -> Result<String, Str
 
     println!("Starting Flutter in: {}", project_path);
 
+    // Get current PATH and add Flutter bin directory
+    let current_path = std::env::var("PATH").unwrap_or_default();
+    let user_profile = std::env::var("USERPROFILE").unwrap_or_default();
+    let user_flutter_path = format!(r"{}\flutter\bin", user_profile);
+
+    let flutter_paths = vec![
+        r"C:\flutter\bin",
+        r"C:\src\flutter\bin",
+        user_flutter_path.as_str(),
+    ];
+
+    let mut new_path = current_path.clone();
+    for flutter_path in flutter_paths {
+        if !new_path.contains(flutter_path) {
+            new_path = format!("{};{}", flutter_path, new_path);
+        }
+    }
+
     // Start Flutter run process
     let mut child = Command::new("flutter")
         .args(["run", "-d", "chrome", "--web-port=8080"])
         .current_dir(&project_path)
+        .env("PATH", new_path)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
