@@ -175,18 +175,22 @@ lazy_static = "1.4"
 
 ---
 
-### 🔄 FASE 4: Preview Embutido (EM PLANEJAMENTO)
+### ✅ FASE 4: Preview Embutido (PARCIALMENTE CONCLUÍDA)
 **Objetivo:** Preview do app Flutter dentro da IDE
 
-#### Fase 4A: Preview Web (Prioridade)
+#### ✅ Fase 4A: Preview Web (CONCLUÍDA)
 **Inspiração:** DreamFlow (Flutter Web dentro de Flutter Web)
 
-**A Implementar:**
-- ⏸️ Componente PreviewPanel com iframe
-- ⏸️ Conexão com Flutter Web (localhost:8080)
-- ⏸️ Device frames visuais (iPhone, Pixel, iPad, etc.)
-- ⏸️ Seletor de dispositivo (dropdown)
-- ⏸️ Controles de zoom e rotação
+**Implementado:**
+- ✅ Componente PreviewPanel com iframe
+- ✅ Conexão com Flutter Web (localhost:8080)
+- ✅ Device frames visuais (iPhone 14 Pro, Pixel 7, iPad Pro, Desktop)
+- ✅ Seletor de dispositivo (dropdown)
+- ✅ Controles de zoom (25%-200%)
+- ✅ Geração de QR Code com URL do Flutter Web
+- ✅ Exibição do QR code no painel de preview
+- ✅ Instruções de como testar no celular
+- ✅ Detecção automática de IP local (via WebRTC)
 - ⏸️ Widget Inspector via VM Service Protocol
 - ⏸️ **Toggle de seleção de elementos** (requisito do usuário)
   - Quando ativado: elementos clicáveis (Text, Widget, Button, Container, Column, Row)
@@ -195,22 +199,25 @@ lazy_static = "1.4"
   - Fornecer contexto para Claude AI
 - ⏸️ Sincronização bidirecional (código ↔ preview)
 
+**Arquivos:**
+- `src/components/Editor/PreviewPanel.tsx`
+- `src/components/Editor/PreviewPanel.css`
+- `src/components/Editor/EditorLayout.tsx` (integração)
+
 **Tecnologias:**
 - iframe para embedding
-- Flutter DevTools API
-- VM Service Protocol (dart:developer)
+- react-qr-code para QR generation
+- WebRTC para detecção de IP local
+- CSS custom para device frames
 
-#### Fase 4B: QR Code para Mobile (Prioridade)
-**Objetivo:** Testar em dispositivos móveis reais
+#### Fase 4B: Widget Inspector (PRÓXIMO)
+**Objetivo:** Inspeção e seleção de widgets
 
 **A Implementar:**
-- ⏸️ Geração de QR Code com URL do Flutter Web
-- ⏸️ Exibição do QR code no painel de preview
-- ⏸️ Instruções de como testar no celular
-- ⏸️ Detecção automática de IP local
-
-**Bibliotecas:**
-- `qrcode` ou `react-qr-code`
+- ⏸️ Conexão com Flutter DevTools API
+- ⏸️ VM Service Protocol integration
+- ⏸️ Toggle de seleção de elementos
+- ⏸️ Mapear elementos visuais → código fonte
 
 #### Fase 4C: Emulador Android (Futuro)
 **Objetivo:** Emulador Android embutido (opcional)
@@ -393,23 +400,21 @@ IDE-Flutter/
   - Hot Restart funciona
   - Stop funciona
 
-### 2. Começar Fase 4A (Preview Web)
-- [ ] Criar componente `PreviewPanel.tsx`
-- [ ] Adicionar iframe apontando para localhost:8080
-- [ ] Implementar device frames (CSS)
-- [ ] Criar seletor de dispositivo
-- [ ] Integrar no EditorLayout (painel direito)
+### 2. ✅ Fase 4A Concluída (Preview Web)
+- [x] Criar componente `PreviewPanel.tsx`
+- [x] Adicionar iframe apontando para localhost:8080
+- [x] Implementar device frames (CSS)
+- [x] Criar seletor de dispositivo
+- [x] Integrar no EditorLayout (painel direito)
+- [x] Gerar QR code com URL
+- [x] Exibir no preview panel
+- [x] Detectar IP local automaticamente
 
-### 3. Implementar Widget Inspector
+### 3. Implementar Widget Inspector (Fase 4B)
 - [ ] Pesquisar VM Service Protocol
 - [ ] Conectar ao Flutter DevTools
 - [ ] Mapear elementos visuais → código
 - [ ] Implementar toggle de seleção
-
-### 4. QR Code
-- [ ] Gerar QR code com URL
-- [ ] Exibir no preview panel
-- [ ] Detectar IP local automaticamente
 
 ---
 
@@ -479,8 +484,8 @@ npm run tauri build
 ### Curto Prazo (1-2 semanas)
 - ✅ IDE funcional com editor e file system
 - ✅ Flutter run/hot reload integrado
-- ⏸️ Preview embutido funcionando
-- ⏸️ QR code para mobile
+- ✅ Preview embutido funcionando
+- ✅ QR code para mobile
 
 ### Médio Prazo (1-2 meses)
 - ⏸️ Claude AI totalmente integrado
@@ -503,11 +508,11 @@ npm run tauri build
 | 1. Autenticação | ✅ Completo | 100% |
 | 2. Editor | ✅ Completo | 100% |
 | 3. Flutter Integration | ✅ Completo | 100% |
-| 4. Preview | 🔄 Planejado | 0% |
+| 4. Preview | 🔄 Em Andamento | 60% (4A completo, 4B pendente) |
 | 5. Claude AI | 🔄 Planejado | 0% |
 | 6. Avançado | 🔄 Futuro | 0% |
 
-**Progresso Total:** ~50% (3/6 fases principais)
+**Progresso Total:** ~60% (3.6/6 fases principais)
 
 ---
 
@@ -522,4 +527,4 @@ npm run tauri build
 ---
 
 **Última atualização:** 10/11/2025
-**Versão atual:** 0.3.0-alpha (Fase 3 concluída)
+**Versão atual:** 0.4.0-alpha (Fase 4A concluída - Preview Panel ativo)
