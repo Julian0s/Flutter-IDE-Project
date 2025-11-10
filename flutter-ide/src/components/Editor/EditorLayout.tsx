@@ -63,21 +63,28 @@ export function EditorLayout() {
   // Auto-start Flutter when workspace opens (if Flutter project)
   useEffect(() => {
     const autoStartFlutter = async () => {
+      console.log('[Auto-Preview] Effect triggered. workspaceRoot:', workspaceRoot, 'isRunning:', isRunning);
+
       if (workspaceRoot && !isRunning) {
         console.log('[Auto-Preview] Workspace detected:', workspaceRoot);
-        const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
-        console.log('[Auto-Preview] Is Flutter project?', isFlutter);
 
-        if (isFlutter) {
-          console.log('[Auto-Preview] Flutter project detected, starting preview...');
-          try {
-            await startFlutter(workspaceRoot);
-            console.log('[Auto-Preview] Preview started successfully');
-          } catch (error) {
-            console.error('[Auto-Preview] Failed to start preview:', error);
+        try {
+          const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
+          console.log('[Auto-Preview] Is Flutter project?', isFlutter);
+
+          if (isFlutter) {
+            console.log('[Auto-Preview] Flutter project detected, starting preview...');
+            try {
+              await startFlutter(workspaceRoot);
+              console.log('[Auto-Preview] Preview started successfully');
+            } catch (error) {
+              console.error('[Auto-Preview] Failed to start preview:', error);
+            }
+          } else {
+            console.log('[Auto-Preview] Not a Flutter project, skipping auto-start');
           }
-        } else {
-          console.log('[Auto-Preview] Not a Flutter project, skipping auto-start');
+        } catch (error) {
+          console.error('[Auto-Preview] Error checking if Flutter project:', error);
         }
       } else if (!workspaceRoot) {
         console.log('[Auto-Preview] No workspace root set');

@@ -85,14 +85,19 @@ export const useFlutterStore = create<FlutterState>((set, get) => ({
   // Start Flutter process
   startFlutter: async (projectPath: string) => {
     try {
+      console.log('[FlutterStore] Starting Flutter at:', projectPath);
       set({ isRunning: true, logs: [], errors: [] });
 
       // Setup listeners before starting
+      console.log('[FlutterStore] Setting up listeners...');
       await get().setupListeners();
 
+      console.log('[FlutterStore] Calling FlutterService.runFlutter...');
       const url = await FlutterService.runFlutter(projectPath);
+      console.log('[FlutterStore] Flutter started, URL:', url);
       set({ previewUrl: url });
     } catch (error) {
+      console.error('[FlutterStore] Error starting Flutter:', error);
       set({ isRunning: false, previewUrl: null });
       throw error;
     }

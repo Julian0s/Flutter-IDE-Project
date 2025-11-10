@@ -22,8 +22,14 @@ pub struct FileNode {
 
 #[tauri::command]
 async fn run_flutter(app: AppHandle, project_path: String) -> Result<String, String> {
-    // Stop any existing Flutter process
-    stop_flutter().await?;
+    // Check if Flutter is already running
+    {
+        let process = FLUTTER_PROCESS.lock().unwrap();
+        if process.is_some() {
+            println!("Flutter is already running, skipping start");
+            return Ok("http://localhost:8080".to_string());
+        }
+    }
 
     println!("Starting Flutter in: {}", project_path);
 
