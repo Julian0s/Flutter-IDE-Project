@@ -4,7 +4,7 @@ import { WidgetInspectorService } from '../../services/widgetInspectorService';
 import './WidgetInspector.css';
 
 export const WidgetInspector: React.FC = () => {
-  const { isEnabled, selectedWidget, hoveredWidget, inspectionHistory, setSelectedWidget, setHoveredWidget } =
+  const { isEnabled, selectedWidget, hoveredWidget, setSelectedWidget, setHoveredWidget } =
     useWidgetInspectorStore();
 
   // Setup listeners for widget selection
@@ -25,63 +25,9 @@ export const WidgetInspector: React.FC = () => {
 
   const currentWidget = selectedWidget || hoveredWidget;
 
-  if (!isEnabled) {
-    return (
-      <div className="widget-inspector">
-        <div className="inspector-header">
-          <h3>Widget Inspector</h3>
-          <div className="inspector-status disabled">
-            <span className="status-dot"></span>
-            Disabled
-          </div>
-        </div>
-        <div className="inspector-empty">
-          <div className="empty-icon">🔍</div>
-          <p>Enable inspector mode to select widgets</p>
-          <div className="inspector-hint">
-            Click the <strong>🔍 Inspector</strong> button in the preview panel
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentWidget) {
-    return (
-      <div className="widget-inspector">
-        <div className="inspector-header">
-          <h3>Widget Inspector</h3>
-          <div className="inspector-status active">
-            <span className="status-dot"></span>
-            Waiting for selection...
-          </div>
-        </div>
-        <div className="inspector-empty">
-          <div className="empty-icon">👆</div>
-          <p>Click on any widget in the preview</p>
-          <div className="inspector-hint">
-            Select elements like Text, Container, Button, etc.
-          </div>
-        </div>
-
-        {inspectionHistory.length > 0 && (
-          <div className="inspector-history">
-            <h4>Recent Selections</h4>
-            <div className="history-list">
-              {inspectionHistory.map((widget, index) => (
-                <div
-                  key={index}
-                  className="history-item"
-                  onClick={() => setSelectedWidget(widget)}
-                >
-                  <span className="widget-type">{widget.type}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
+  // Only show if inspector is enabled AND there's a widget selected
+  if (!isEnabled || !currentWidget) {
+    return null;
   }
 
   return (

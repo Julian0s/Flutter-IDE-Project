@@ -130,11 +130,11 @@ export const PreviewPanel: React.FC = () => {
 
         <div className="preview-controls">
           <button
-            className={`control-btn ${isInspectorEnabled ? 'active' : ''}`}
+            className={`control-btn inspect-toggle ${isInspectorEnabled ? 'active' : ''}`}
             onClick={toggleInspector}
-            title="Toggle Widget Inspector (Select elements)"
+            title="Toggle Inspect Mode - Click elements to inspect"
           >
-            🔍 Inspector
+            {isInspectorEnabled ? '🔍 Inspect: ON' : '🔍 Inspect Mode'}
           </button>
 
           <button
@@ -200,11 +200,17 @@ export const PreviewPanel: React.FC = () => {
           </div>
         ) : (
           <div
-            className={`preview-viewport ${device.frame ? 'with-frame' : ''}`}
+            className={`preview-viewport ${device.frame ? 'with-frame' : ''} ${isInspectorEnabled ? 'inspect-mode-active' : ''}`}
             style={{
               transform: `scale(${zoom})`,
             }}
           >
+            {isInspectorEnabled && (
+              <div className="inspect-mode-indicator">
+                <span className="indicator-icon">🔍</span>
+                <span className="indicator-text">Inspect Mode Active - Click any element</span>
+              </div>
+            )}
             {device.frame && (
               <div
                 className={`device-frame device-${selectedDevice}`}

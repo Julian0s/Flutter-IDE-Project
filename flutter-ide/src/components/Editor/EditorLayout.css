@@ -193,6 +193,7 @@
 
 /* Right Panel */
 .editor-rightpanel {
+  position: relative;
   width: 450px;
   background: #252526;
   border-left: 1px solid #3e3e42;
@@ -200,43 +201,6 @@
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
-}
-
-.rightpanel-tabs {
-  display: flex;
-  gap: 0;
-  background: #2d2d30;
-  border-bottom: 1px solid #3e3e42;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #999;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tab-btn:hover {
-  color: #cccccc;
-  background: #37373d;
-}
-
-.tab-btn.active {
-  color: #ffffff;
-  border-bottom-color: #4ec9b0;
-  background: #1e1e1e;
-}
-
-.rightpanel-content {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Footer */
