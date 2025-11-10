@@ -78,7 +78,7 @@ export function EditorLayout() {
         stopFlutter();
       }
     };
-  }, [workspaceRoot, isRunning, startFlutter, stopFlutter]);
+  }, [workspaceRoot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto hot reload on save
   useEffect(() => {
