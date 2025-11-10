@@ -3,6 +3,7 @@ import { MonacoEditor } from './MonacoEditor';
 import { FileExplorer } from './FileExplorer';
 import { FlutterControls } from './FlutterControls';
 import { Console } from './Console';
+import { PreviewPanel } from './PreviewPanel';
 import { useAuth } from '../../hooks/useAuth';
 import { useFileExplorerStore } from '../../stores/fileExplorerStore';
 import './EditorLayout.css';
@@ -105,17 +106,9 @@ export function EditorLayout() {
           )}
         </main>
 
-        {/* Right Panel - Preview/AI (placeholder for now) */}
+        {/* Right Panel - Preview */}
         <aside className="editor-rightpanel">
-          <div className="panel-header">
-            <h3>Preview</h3>
-          </div>
-          <div className="panel-content">
-            <div className="preview-placeholder">
-              <span className="preview-icon">📱</span>
-              <p>Preview em breve...</p>
-            </div>
-          </div>
+          <PreviewPanel />
         </aside>
       </div>
 
