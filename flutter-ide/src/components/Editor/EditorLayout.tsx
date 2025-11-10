@@ -18,21 +18,52 @@ export function EditorLayout() {
   const currentContent = currentFile ? openFiles.get(currentFile) || '' : '';
   const currentFileName = currentFile ? currentFile.split(/[\\/]/).pop() || 'Sem arquivo' : 'Sem arquivo';
 
-  // Load persisted workspace on mount
+  // Load persisted workspace on mount AND auto-start Flutter
   useEffect(() => {
-    const loadPersistedWorkspace = async () => {
+    const loadWorkspaceAndStartFlutter = async () => {
       if (workspaceRoot) {
         console.log('[Workspace] Loading persisted workspace:', workspaceRoot);
         try {
           await loadFileTree(workspaceRoot);
           console.log('[Workspace] Persisted workspace loaded successfully');
+
+          // Auto-start Flutter if it's a Flutter project and not already running
+          if (!isRunning) {
+            console.log('[Auto-Preview] Checking if Flutter project...');
+            try {
+              const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
+              console.log('[Auto-Preview] Is Flutter project?', isFlutter);
+
+              if (isFlutter) {
+                console.log('[Auto-Preview] Flutter project detected, starting preview...');
+                await startFlutter(workspaceRoot);
+                console.log('[Auto-Preview] Preview started successfully');
+              } else {
+                console.log('[Auto-Preview] Not a Flutter project, skipping auto-start');
+              }
+            } catch (error) {
+              console.error('[Auto-Preview] Error checking/starting Flutter:', error);
+            }
+          } else {
+            console.log('[Auto-Preview] Flutter already running');
+          }
         } catch (error) {
           console.error('[Workspace] Failed to load persisted workspace:', error);
         }
+      } else {
+        console.log('[Workspace] No persisted workspace found');
       }
     };
 
-    loadPersistedWorkspace();
+    loadWorkspaceAndStartFlutter();
+
+    // Cleanup on unmount
+    return () => {
+      if (isRunning) {
+        console.log('[Auto-Preview] Stopping Flutter on unmount');
+        stopFlutter();
+      }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSignOut = async () => {
@@ -60,48 +91,25 @@ export function EditorLayout() {
     }
   };
 
-  // Auto-start Flutter when workspace opens (if Flutter project)
+  // Handle workspace changes (when user selects a new folder)
   useEffect(() => {
-    const autoStartFlutter = async () => {
-      console.log('[Auto-Preview] Effect triggered. workspaceRoot:', workspaceRoot, 'isRunning:', isRunning);
-
-      if (workspaceRoot && !isRunning) {
-        console.log('[Auto-Preview] Workspace detected:', workspaceRoot);
-
+    const handleWorkspaceChange = async () => {
+      // Skip on initial mount (handled by the first useEffect)
+      if (workspaceRoot && isRunning) {
+        console.log('[Workspace Change] New workspace selected, restarting Flutter...');
         try {
+          await stopFlutter();
           const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
-          console.log('[Auto-Preview] Is Flutter project?', isFlutter);
-
           if (isFlutter) {
-            console.log('[Auto-Preview] Flutter project detected, starting preview...');
-            try {
-              await startFlutter(workspaceRoot);
-              console.log('[Auto-Preview] Preview started successfully');
-            } catch (error) {
-              console.error('[Auto-Preview] Failed to start preview:', error);
-            }
-          } else {
-            console.log('[Auto-Preview] Not a Flutter project, skipping auto-start');
+            await startFlutter(workspaceRoot);
           }
         } catch (error) {
-          console.error('[Auto-Preview] Error checking if Flutter project:', error);
+          console.error('[Workspace Change] Error restarting Flutter:', error);
         }
-      } else if (!workspaceRoot) {
-        console.log('[Auto-Preview] No workspace root set');
-      } else if (isRunning) {
-        console.log('[Auto-Preview] Flutter already running');
       }
     };
 
-    autoStartFlutter();
-
-    // Cleanup on unmount
-    return () => {
-      if (isRunning) {
-        console.log('[Auto-Preview] Stopping Flutter on unmount');
-        stopFlutter();
-      }
-    };
+    handleWorkspaceChange();
   }, [workspaceRoot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto hot reload on save
