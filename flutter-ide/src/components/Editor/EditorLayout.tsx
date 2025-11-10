@@ -12,11 +12,28 @@ import './EditorLayout.css';
 
 export function EditorLayout() {
   const { user, signOut } = useAuth();
-  const { workspaceRoot, currentFile, openFiles, updateFileContent, saveFile } = useFileExplorerStore();
+  const { workspaceRoot, currentFile, openFiles, updateFileContent, saveFile, loadFileTree } = useFileExplorerStore();
   const { isRunning, startFlutter, stopFlutter, hotReload } = useFlutterStore();
 
   const currentContent = currentFile ? openFiles.get(currentFile) || '' : '';
   const currentFileName = currentFile ? currentFile.split(/[\\/]/).pop() || 'Sem arquivo' : 'Sem arquivo';
+
+  // Load persisted workspace on mount
+  useEffect(() => {
+    const loadPersistedWorkspace = async () => {
+      if (workspaceRoot) {
+        console.log('[Workspace] Loading persisted workspace:', workspaceRoot);
+        try {
+          await loadFileTree(workspaceRoot);
+          console.log('[Workspace] Persisted workspace loaded successfully');
+        } catch (error) {
+          console.error('[Workspace] Failed to load persisted workspace:', error);
+        }
+      }
+    };
+
+    loadPersistedWorkspace();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSignOut = async () => {
     try {

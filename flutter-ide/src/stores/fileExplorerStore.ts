@@ -21,8 +21,31 @@ interface FileExplorerState {
   selectFolder: () => Promise<void>;
 }
 
+// Load persisted workspace from localStorage
+const loadPersistedWorkspace = (): string | null => {
+  try {
+    return localStorage.getItem('flutter-ide-workspace');
+  } catch (error) {
+    console.error('Failed to load persisted workspace:', error);
+    return null;
+  }
+};
+
+// Save workspace to localStorage
+const saveWorkspace = (path: string | null) => {
+  try {
+    if (path) {
+      localStorage.setItem('flutter-ide-workspace', path);
+    } else {
+      localStorage.removeItem('flutter-ide-workspace');
+    }
+  } catch (error) {
+    console.error('Failed to save workspace:', error);
+  }
+};
+
 export const useFileExplorerStore = create<FileExplorerState>((set, get) => ({
-  workspaceRoot: null,
+  workspaceRoot: loadPersistedWorkspace(),
   currentFile: null,
   fileTree: [],
   expandedFolders: new Set(),
@@ -31,6 +54,7 @@ export const useFileExplorerStore = create<FileExplorerState>((set, get) => ({
 
   setWorkspaceRoot: (path) => {
     set({ workspaceRoot: path });
+    saveWorkspace(path);
   },
 
   loadFileTree: async (path: string) => {
@@ -39,7 +63,8 @@ export const useFileExplorerStore = create<FileExplorerState>((set, get) => ({
       const files = await FileSystemService.readDirectory(path);
       console.log('loadFileTree: Got files:', files);
       set({ fileTree: files, workspaceRoot: path });
-      console.log('loadFileTree: State updated');
+      saveWorkspace(path);
+      console.log('loadFileTree: State updated and workspace saved');
     } catch (error) {
       console.error('Failed to load file tree:', error);
       throw error;
