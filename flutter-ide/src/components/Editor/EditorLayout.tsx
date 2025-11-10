@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MonacoEditor } from './MonacoEditor';
 import { FileExplorer } from './FileExplorer';
 import { Console } from './Console';
@@ -14,12 +14,16 @@ export function EditorLayout() {
   const { user, signOut } = useAuth();
   const { workspaceRoot, currentFile, openFiles, updateFileContent, saveFile, loadFileTree } = useFileExplorerStore();
   const { isRunning, startFlutter, stopFlutter, hotReload } = useFlutterStore();
+  const initializedRef = useRef(false);
 
   const currentContent = currentFile ? openFiles.get(currentFile) || '' : '';
   const currentFileName = currentFile ? currentFile.split(/[\\/]/).pop() || 'Sem arquivo' : 'Sem arquivo';
 
   // Load persisted workspace on mount AND auto-start Flutter
   useEffect(() => {
+    if (initializedRef.current) return; // Prevent duplicate execution
+    initializedRef.current = true;
+
     const loadWorkspaceAndStartFlutter = async () => {
       if (workspaceRoot) {
         console.log('[Workspace] Loading persisted workspace:', workspaceRoot);
@@ -93,8 +97,10 @@ export function EditorLayout() {
 
   // Handle workspace changes (when user selects a new folder)
   useEffect(() => {
+    // Skip on initial mount (handled by the first useEffect)
+    if (!initializedRef.current) return;
+
     const handleWorkspaceChange = async () => {
-      // Skip on initial mount (handled by the first useEffect)
       if (workspaceRoot && isRunning) {
         console.log('[Workspace Change] New workspace selected, restarting Flutter...');
         try {
