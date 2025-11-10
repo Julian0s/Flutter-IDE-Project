@@ -47,7 +47,10 @@ export function EditorLayout() {
   useEffect(() => {
     const autoStartFlutter = async () => {
       if (workspaceRoot && !isRunning) {
+        console.log('[Auto-Preview] Workspace detected:', workspaceRoot);
         const isFlutter = await FileSystemService.isFlutterProject(workspaceRoot);
+        console.log('[Auto-Preview] Is Flutter project?', isFlutter);
+
         if (isFlutter) {
           console.log('[Auto-Preview] Flutter project detected, starting preview...');
           try {
@@ -56,7 +59,13 @@ export function EditorLayout() {
           } catch (error) {
             console.error('[Auto-Preview] Failed to start preview:', error);
           }
+        } else {
+          console.log('[Auto-Preview] Not a Flutter project, skipping auto-start');
         }
+      } else if (!workspaceRoot) {
+        console.log('[Auto-Preview] No workspace root set');
+      } else if (isRunning) {
+        console.log('[Auto-Preview] Flutter already running');
       }
     };
 
@@ -65,10 +74,11 @@ export function EditorLayout() {
     // Cleanup on unmount
     return () => {
       if (isRunning) {
+        console.log('[Auto-Preview] Stopping Flutter on unmount');
         stopFlutter();
       }
     };
-  }, [workspaceRoot]);
+  }, [workspaceRoot, isRunning, startFlutter, stopFlutter]);
 
   // Auto hot reload on save
   useEffect(() => {
