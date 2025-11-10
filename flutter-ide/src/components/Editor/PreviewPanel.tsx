@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { useFlutterStore } from '../../stores/flutterStore';
+import { useWidgetInspectorStore } from '../../stores/widgetInspectorStore';
+import { WidgetInspectorService } from '../../services/widgetInspectorService';
 import './PreviewPanel.css';
 
 type DeviceType = 'iphone-14' | 'pixel-7' | 'ipad' | 'desktop';
@@ -41,10 +43,12 @@ const DEVICES: Record<DeviceType, DeviceConfig> = {
 
 export const PreviewPanel: React.FC = () => {
   const { isRunning, previewUrl } = useFlutterStore();
+  const { isEnabled: isInspectorEnabled, toggleInspector } = useWidgetInspectorStore();
   const [selectedDevice, setSelectedDevice] = useState<DeviceType>('iphone-14');
   const [showQR, setShowQR] = useState(false);
   const [localIP, setLocalIP] = useState<string>('localhost');
   const [zoom, setZoom] = useState(1);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const device = DEVICES[selectedDevice];
   const urlForQR = previewUrl?.replace('localhost', localIP) || '';
@@ -75,6 +79,22 @@ export const PreviewPanel: React.FC = () => {
 
     if (isRunning) {
       detectLocalIP();
+    }
+  }, [isRunning]);
+
+  // Initialize Widget Inspector when iframe loads
+  useEffect(() => {
+    if (iframeRef.current && isRunning) {
+      const iframe = iframeRef.current;
+
+      // Wait for iframe to load
+      iframe.addEventListener('load', () => {
+        WidgetInspectorService.initialize(iframe);
+      });
+
+      return () => {
+        WidgetInspectorService.cleanup();
+      };
     }
   }, [isRunning]);
 
@@ -109,6 +129,14 @@ export const PreviewPanel: React.FC = () => {
         </select>
 
         <div className="preview-controls">
+          <button
+            className={`control-btn ${isInspectorEnabled ? 'active' : ''}`}
+            onClick={toggleInspector}
+            title="Toggle Widget Inspector (Select elements)"
+          >
+            🔍 Inspector
+          </button>
+
           <button
             className={`control-btn ${showQR ? 'active' : ''}`}
             onClick={() => setShowQR(!showQR)}
@@ -187,6 +215,7 @@ export const PreviewPanel: React.FC = () => {
               >
                 <div className="device-notch"></div>
                 <iframe
+                  ref={iframeRef}
                   src={previewUrl || ''}
                   className="preview-iframe"
                   title="Flutter Preview"
@@ -197,6 +226,7 @@ export const PreviewPanel: React.FC = () => {
 
             {!device.frame && (
               <iframe
+                ref={iframeRef}
                 src={previewUrl || ''}
                 className="preview-iframe preview-iframe-fullscreen"
                 title="Flutter Preview"

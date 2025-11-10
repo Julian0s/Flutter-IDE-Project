@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MonacoEditor } from './MonacoEditor';
 import { FileExplorer } from './FileExplorer';
 import { FlutterControls } from './FlutterControls';
 import { Console } from './Console';
 import { PreviewPanel } from './PreviewPanel';
+import { WidgetInspector } from './WidgetInspector';
 import { useAuth } from '../../hooks/useAuth';
 import { useFileExplorerStore } from '../../stores/fileExplorerStore';
 import './EditorLayout.css';
@@ -11,6 +12,7 @@ import './EditorLayout.css';
 export function EditorLayout() {
   const { user, signOut } = useAuth();
   const { currentFile, openFiles, updateFileContent, saveFile } = useFileExplorerStore();
+  const [rightPanelTab, setRightPanelTab] = useState<'preview' | 'inspector'>('preview');
 
   const currentContent = currentFile ? openFiles.get(currentFile) || '' : '';
   const currentFileName = currentFile ? currentFile.split(/[\\/]/).pop() || 'Sem arquivo' : 'Sem arquivo';
@@ -106,9 +108,25 @@ export function EditorLayout() {
           )}
         </main>
 
-        {/* Right Panel - Preview */}
+        {/* Right Panel - Preview & Inspector */}
         <aside className="editor-rightpanel">
-          <PreviewPanel />
+          <div className="rightpanel-tabs">
+            <button
+              className={`tab-btn ${rightPanelTab === 'preview' ? 'active' : ''}`}
+              onClick={() => setRightPanelTab('preview')}
+            >
+              📱 Preview
+            </button>
+            <button
+              className={`tab-btn ${rightPanelTab === 'inspector' ? 'active' : ''}`}
+              onClick={() => setRightPanelTab('inspector')}
+            >
+              🔍 Inspector
+            </button>
+          </div>
+          <div className="rightpanel-content">
+            {rightPanelTab === 'preview' ? <PreviewPanel /> : <WidgetInspector />}
+          </div>
         </aside>
       </div>
 
